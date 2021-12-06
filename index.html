@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" style="width:100%;height:100%;margin:0;padding:0;border:0;">
+<head>
+    <meta charset="utf-8">
+
+    <script src="/widgets/cc-baselib-next/static/vue.global.js"></script> 
+    <script src="/widgets/cc-baselib-next/static/element-plus/index.full.js"></script>
+    <!--axios-->
+    <script src="/widgets/cc-baselib-next/static/axios.min.js"></script>
+    <!--引入单文件组件加载器-->
+    <script src="/widgets/cc-baselib-next/static/vue3-sfc-loader.js"></script>
+
+    <link rel="stylesheet" href="/widgets/cc-baselib-next/static/element-plus/index.css" />
+
+
+</head>
+<body>
+    <div id="app">
+
+    </div>
+</body>
+<script  type="module">
+import * as ElIcons   from "/widgets/cc-baselib-next/static/element-plus/icons/es/index.js"
+import * as Vue   from "/widgets/cc-baselib-next/static/vue.global.js"
+
+const options = {
+    moduleCache: {
+      vue: Vue
+    },
+    async getFile(url) {
+      
+      const res = await fetch(url);
+      if ( !res.ok )
+        throw Object.assign(new Error(res.statusText + ' ' + url), { res });
+      return {
+        getContentData: asBinary => asBinary ? res.arrayBuffer() : res.text(),
+      }
+    },
+    addStyle(textContent) {
+      const style = Object.assign(document.createElement('style'), { textContent });
+      const ref = document.head.getElementsByTagName('style')[0] || null;
+      document.head.insertBefore(style, ref);
+    },
+  }
+
+  const { loadModule } = window['vue3-sfc-loader'];
+  
+  const componentsList = {
+    'app':'app.vue',
+  }
+  
+  const app = Vue.createApp({})
+  
+  for (const icon in ElIcons){
+    app.component(icon,Vue.defineAsyncComponent( () => loadModule(componentsList[icon], options) ) )
+}
+
+  for (component in componentsList){
+    app.component(component,Vue.defineAsyncComponent( () => loadModule(componentsList[component], options) ) )
+  }
+  
+  app.template= '<app></app>'
+  app.use(ElementPlus)
+  app.mount('#app');
+    
+</script>
